@@ -11,7 +11,7 @@ class ControlNode:
             '/bloco_detectado', Point, self.bloco_callback, queue_size=1
         )
 
-        self.area_alvo = rospy.get_param('~area_alvo', 200000)
+        self.area_alvo = rospy.get_param('~area_alvo', 120000)
         self.estado = "PROCURANDO"
 
         rospy.loginfo("control_node iniciado.")
@@ -34,6 +34,7 @@ class ControlNode:
 
         elif self.estado == "ALINHANDO":
             if detectado:
+                # Sinais ajustados para a rotação real do robô
                 if erro_x < -0.1:
                     cmd.linear.x = 0.0
                     cmd.angular.z = -0.25 
@@ -57,26 +58,25 @@ class ControlNode:
                 self.estado = "PARADO"
                 cmd.linear.x = 0.0
                 cmd.angular.z = 0.0
-                rospy.loginfo("Bloco alcançado!")
                 
-            elif erro_x < -0.25:
-                self.estado = "ALINHANDO"
-                cmd.linear.x = 0.0
-                cmd.angular.z = 0.0
-                
-            elif erro_x > 0.25:
+            elif erro_x < -0.25 or erro_x > 0.25:
                 self.estado = "ALINHANDO"
                 cmd.linear.x = 0.0
                 cmd.angular.z = 0.0
                 
             else:
-                # Sinal invertido para compensar a montagem do chassi
                 cmd.linear.x = -0.2
                 cmd.angular.z = 0.0
 
         elif self.estado == "PARADO":
             if not detectado:
                 self.estado = "PROCURANDO"
+            elif erro_x < -0.25 or erro_x > 0.25:
+                # Bloco movido lateralmente
+                self.estado = "ALINHANDO"
+            elif area < (self.area_alvo - 20000):
+                # Bloco afastado
+                self.estado = "SEGUINDO"
             else:
                 cmd.linear.x = 0.0
                 cmd.angular.z = 0.0
