@@ -11,7 +11,7 @@ class ControlNode:
             '/bloco_detectado', Point, self.bloco_callback, queue_size=1
         )
 
-        self.area_alvo = rospy.get_param('~area_alvo', 120000)
+        self.area_alvo = rospy.get_param('~area_alvo', 200000)
         self.estado = "PROCURANDO"
 
         rospy.loginfo("control_node iniciado.")
