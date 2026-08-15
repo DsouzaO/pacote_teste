@@ -1,0 +1,25 @@
+<launch>
+
+    <arg name="sim" default="true"/>
+
+    <group if="$(eval arg('sim') == true)">
+
+        <include file="$(find pacote_teste)/launch/gazebo.launch"/>
+
+    </group>
+
+    <node
+        pkg="pacote_teste"
+        type="visao_node.py"
+        name="visao_node"
+        output="screen"
+    />
+
+    <node
+        pkg="pacote_teste"
+        type="control_node.py"
+        name="control_node"
+        output="screen"
+    />
+
+</launch>
